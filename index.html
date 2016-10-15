@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Article: http://www.paulrhayes.com/2009-07/animated-css3-cube-interface-using-3d-transforms/ -->
+    <!-- Demo: http://www.paulrhayes.com/experiments/cube-3d/ -->
+    <!-- Originally posted: 17th July 2009 -->
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>3D CSS cube, use arrow keys to rotate &mdash; Paul Hayes</title>
+    <link rel="stylesheet" href="css/experiment-styles.css" />
+
+    <link rel="stylesheet" href="css/experiment.css" />
+    <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+    <style>
+        video{
+          position: relative;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+    </style>
+</head>
+
+<body class="experiment">
+    <div class="wrapper">
+        
+        <div id="experiment">
+            <div id="cube"></div>
+        </div>
+
+    </div>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    <script src="js/experiment.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+
+    <script>
+
+    var faces = ['one','two','three','four','five','six'];
+
+    var vids = {
+        'red_pandas': [
+            'http://zippy.gfycat.com/ObedientCharmingArkshell.mp4',
+            'http://zippy.gfycat.com/ResponsibleConstantHanumanmonkey.mp4',
+            'http://zippy.gfycat.com/MeanWildFlyingfish.mp4',
+            'http://zippy.gfycat.com/NeighboringIdleBedbug.mp4',
+            'http://zippy.gfycat.com/ObedientCharmingArkshell.mp4',
+            'http://zippy.gfycat.com/ResponsibleConstantHanumanmonkey.mp4'
+        ]
+    }
+
+    var controls = {
+        'gifs': 'Red_Pandas',
+        'bgcolor': '#ffae23' 
+    }
+
+    $(document).on('ready', function(){
+
+        initCube(vids['red_pandas']);
+
+        var gui = new dat.GUI();
+        gui.add(controls, 'gifs', ['Red_Pandas']).onChange(function(value){
+            changeFaceVid(vids[value.toLowerCase()]);
+        })
+        
+        gui.addColor(controls, 'bgcolor').onChange(function(value){
+            changeFaceBackground(value)
+        })    
+
+        changeFaceBackground(controls['bgcolor'])
+
+    })
+
+    window.addEventListener("gamepadconnected", function(e) {
+      console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+        e.gamepad.index, e.gamepad.id,
+        e.gamepad.buttons.length, e.gamepad.axes.length);
+        window.setInterval(checkGamepad,100);
+    });
+
+    window.addEventListener("gamepaddisconnected", function(e) {
+      console.log("Gamepad disconnected from index %d: %s",
+        e.gamepad.index, e.gamepad.id);
+    });
+
+    function initCube(vids){
+        $.each(vids, function(idx, vid){
+            
+            ediv = '<div class="face ' + faces[idx] +'"><video src="' + vid + '" width="100%" autoplay loop /></div>';
+            $('#cube').append(ediv);
+            
+        });
+    }
+
+    function changeFaceVid(vids){
+        var face_vids = $('#cube .face video');
+        $.each(face_vids, function(idx, face_vid){    
+            face_vid.src = vids[idx];
+            face_vid.load();
+            face_vid.play(); 
+        });
+    }
+
+    function changeFaceBackground(color){
+        var rgbaCol = 'rgba(' + parseInt(color.slice(-6,-4),16)
+            + ',' + parseInt(color.slice(-4,-2),16)
+            + ',' + parseInt(color.slice(-2),16)
+            +',0.5)';
+        $('.face').css('background-color', rgbaCol)
+    }
+
+    function checkGamepad() {
+        var gp = navigator.getGamepads()[0];
+        var axis0 = gp.axes[0];
+        var axis1 = gp.axes[1];
+        
+        if(axis0 < -0.5) { // Left
+            yAngle += 90;
+        } else if(axis0 > 0.5) { // Right
+            yAngle -= 90;
+        } 
+
+        if(axis1 < -0.5) { // Down
+            xAngle += 90;
+        } else if(axis1 > 0.5) { // Up
+            xAngle -= 90;
+        } 
+
+        document.getElementById('cube').style[prop] = "rotateX("+xAngle+"deg) rotateY("+yAngle+"deg)";
+
+    }
+
+    var xAngle = 0, yAngle = 0;
+
+    </script>
+
+</body>
+</html>
